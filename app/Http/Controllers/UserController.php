@@ -70,8 +70,8 @@ class UserController extends Controller
 
     	$jwtAuth = new \JwtAuth();
 
-
-
-    	return $jwtAuth->signup();
+    	$email = 'maykel@gmail.com';
+    	$password = 'maykel';
+    	return response()->json($jwtAuth->signup($email,$password),200);
     }
 }
