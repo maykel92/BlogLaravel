@@ -50,7 +50,7 @@ class UserController extends Controller
 		    		'status' => 'success',
 		    		'code' => 200,
 		    		'message' => 'El usuario se ha creado correctamente.',
-		    		'user' => $user;
+		    		'user' => $user
 	    		);
 	    	}
     	}else{
@@ -67,6 +67,11 @@ class UserController extends Controller
     }
 
     public function login(Request $request){
-    	return "Acci&oacuten de login de usuarios.";
+
+    	$jwtAuth = new \JwtAuth();
+
+
+
+    	return $jwtAuth->signup();
     }
 }
