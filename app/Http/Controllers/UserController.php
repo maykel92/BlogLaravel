@@ -50,7 +50,7 @@ class UserController extends Controller
 		    		'status' => 'success',
 		    		'code' => 200,
 		    		'message' => 'El usuario se ha creado correctamente.',
-		    		'user' => $user;
+		    		'user' => $user
 	    		);
 	    	}
     	}else{
@@ -67,6 +67,71 @@ class UserController extends Controller
     }
 
     public function login(Request $request){
-    	return "Acci&oacuten de login de usuarios.";
+
+    	$jwtAuth = new \JwtAuth();
+
+    	//Recibo datos por Post.
+    	$json = $request->input('json',null);
+    	$params = json_decode($json);
+    	$params_array = json_decode($json,true);
+
+    	//Validar datos.
+    	if(!empty($params) && !empty($params_array)){
+
+    		$validate = \Validator::make($params_array,[
+	    		'email'		=> 'required|email',
+	    		'password'	=> 'required'
+
+    		]);
+
+	    	if($validate->fails()){
+	    		$signup = array(
+		    		'status' => 'error',
+		    		'code' => 404,
+		    		'message' => 'El usuario no se ha podido identificar.',
+		    		'errors' => $validate->errors()
+	    		);
+	    	}
+	    	else{
+	    		
+	    		//Devolver token o datos.
+
+	    		if(!empty($params->gettoken)){
+	    			$signup = $jwtAuth->signup($params->email,
+	    			$params->password,true);
+	    		}else{
+	    			$signup = $jwtAuth->signup($params->email,
+	    			$params->password);
+	    		}
+
+	    	}
+    	}else{
+
+    		$signup = array(
+		    		'status' => 'error',
+		    		'code' => 404,
+		    		'message' => 'Los datos enviados no son correctos.'
+	    		);
+    	}
+
+    	return response()->json($signup,200);
+    }
+
+    public function update(Request $request){
+
+    	$token = $request->header('Authorization');
+    	//$token = str_replace('"','',$token);
+
+    	$jwtAuth = new \JwtAuth();
+    	$checkToken = $jwtAuth->checkToken($token);
+
+    	if($checkToken){
+    		echo "<h1>Login Correcto</h1>";
+    	}else{
+    		echo "<h1>Login Incorrecto</h1>";
+    	}
+
+    	die();
+
     }
 }
