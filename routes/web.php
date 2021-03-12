@@ -18,4 +18,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('test-orm', 'App\Http\Controllers\PruebasController@testOrm');
+Route::post('api/register','App\Http\Controllers\UserController@register');
+
+Route::post('api/login','App\Http\Controllers\UserController@login');
