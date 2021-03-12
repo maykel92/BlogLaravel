@@ -11,11 +11,11 @@ use App\Models\User;
  */
 class JwtAuth
 {
-	protected $key;
+	private $key;
 	
 	function __construct()
 	{
-		$this->key = rand(0, 9999999);
+		$this->key = "MiKey1234";
 	}
 
 	public function signup($email, $password, $getToken = null){
@@ -39,13 +39,13 @@ class JwtAuth
 				'exp'		=>	time() + (7 * 24 * 60 *60)
 			);
 			$jwt = JWT::encode($token, $this->key, 'HS256');
-			$decode = JWT::decode($jwt, $this->key, ['HS256']);
+			$decoded = JWT::decode($jwt, $this->key, ['HS256']);
 			//Devuelvo datos decodificados o el token.
 			
 			if(is_null($getToken)){
 				$data = $jwt;
 			}else{
-				$data = $decode;
+				$data = $decoded;
 			}
 
 		}else{
@@ -57,5 +57,31 @@ class JwtAuth
 
 
 		return $data;
+	}
+
+	public function checkToken($jwt, $getIdentity = false){
+		$auth = false;
+		//$decoded = null;
+		try{
+			$jwt = str_replace('"','',$jwt);
+			$decoded = JWT::decode($jwt, $this->key, ['HS256']);
+		}catch(\UnexpectedValueException $e){
+			$auth = false;
+		}catch(\DomainException $e){
+			$auth = false;
+		}
+
+		if(!empty($decoded) && is_object($decoded) && isset($decoded->sub)){
+			$auth = true;
+		}else{
+			$auth = false;
+		}
+
+		if($getIdentity){
+			return $decoded;
+		}else{
+			return $auth;
+		}
+		
 	}
 }
