@@ -120,18 +120,47 @@ class UserController extends Controller
     public function update(Request $request){
 
     	$token = $request->header('Authorization');
-    	//$token = str_replace('"','',$token);
-
     	$jwtAuth = new \JwtAuth();
     	$checkToken = $jwtAuth->checkToken($token);
 
-    	if($checkToken){
-    		echo "<h1>Login Correcto</h1>";
+    	$json = $request->input('json',null);
+    		$params_array = json_decode($json,true);
+
+    	if($checkToken && !empty($params_array)){
+    		
+    		$user = $jwtAuth->checkToken($token,true);
+
+    		$validate = \Validator::make($params_array,[
+    			'name'		=> 'required|alpha',
+	    		'surname'	=> 'required|alpha',
+	    		'email'		=> 'required|email|unique:users,'.$user->sub,
+    		]);
+
+    		unset($params_array['id']);
+    		unset($params_array['role']);
+    		unset($params_array['password']);
+    		unset($params_array['created_at']);
+    		unset($params_array['remember_token']);
+
+    		$user_update = User::where('id', $user->sub)->update($params_array);
+
+    		$data = array(
+    			'code' 		=> 200,
+    			'status' 	=> 'succes',
+    			'user'		=> $user,
+    			'changes'	=> $params_array
+    		);
+
+
+
     	}else{
-    		echo "<h1>Login Incorrecto</h1>";
+    		$data = array(
+    			'code' 		=> 400,
+    			'status' 	=> 'error',
+    			'message' 	=> 'El usuario no esta identificado.' 
+    		);
     	}
 
-    	die();
-
+    	return response()->json($data, $data['code']);
     }
 }
